@@ -4,6 +4,7 @@ const GroupController = require("./../Controllers/GroupController");
 const middelware = require("./../Controllers/Middelware");
 
 Router.use(middelware.protect);
+Router.post("/search", GroupController.searchGroup);
 Router.post(
     "/create",
     GroupController.setCreateGroup,

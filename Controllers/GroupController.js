@@ -74,3 +74,19 @@ exports.CreateGroupPost = CatchAsync(async (req, res, next) => {
         },
     });
 });
+exports.searchGroup = CatchAsync(async (req, res, next) => {
+    let query;
+    if (req.query.search) {
+        query = { groupName: { $regex: req.query.search, $options: "i" } };
+    }
+    const groups = await group.find(query);
+    if (groups)
+        return next(new AppError(404, "there is no group with is name"));
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            groups,
+        },
+    });
+});
