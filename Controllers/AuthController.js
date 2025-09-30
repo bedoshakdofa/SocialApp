@@ -36,10 +36,7 @@ const signToken = (id) => {
         expiresIn: "90d",
     });
 };
-
 exports.Signup = CatchAsync(async (req, res, next) => {
-    if (!req.body) return next(new AppError(401, "invaild input"));
-
     const newUser = await User.create(req.body);
 
     const Token = newUser.CreatePasswordRestToken();
@@ -49,14 +46,12 @@ exports.Signup = CatchAsync(async (req, res, next) => {
     const URL = `${req.protocol}://${req.get(
         "host"
     )}/api/v1/users/verfiyemail/${Token}`;
-    const message = `Submit a PATCH request to: ${URL}.\n to verfiy your account`;
 
     try {
-        await SendEmail({
-            email: newUser.email,
-            subject: "verfiy your email ",
-            message,
-        });
+        await new SendEmail(URL, newUser).Send(
+            "verfiy your account",
+            "emailverfiy"
+        );
         res.status(201).json({
             status: "success",
             message: "please check your email to verfiy your email",
@@ -83,15 +78,8 @@ exports.verfiyEmail = CatchAsync(async (req, res, next) => {
     currantuser.TokenExp = undefined;
     currantuser.active = true;
     await currantuser.save({ validateBeforeSave: false });
-
-    const jwtToken = signToken(currantuser._id);
-
     res.status(200).json({
-        status: "success",
-        token: jwtToken,
-        data: {
-            user: currantuser,
-        },
+        status: "email verfied ✅",
     });
 });
 
@@ -149,7 +137,7 @@ exports.forgetpassword = CatchAsync(async (req, res, next) => {
 
     const restURL = `${req.protocol}://${req.get(
         "host"
-    )}/api/v1/users/restpassword/${RestToken}`;
+    )}/api/v1/users/restpassword`;
 
     const message = `Forgot your password? 
     Submit a PATCH request with your new password and passwordConfirm to: ${restURL}.

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const UserSchema = mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     firstName: {
         type: String,
         tirm: true,
@@ -69,10 +69,13 @@ const UserSchema = mongoose.Schema({
     ],
     Token: String,
     TokenExp: String,
+    OTP: String,
+    OTPExp: Date,
 });
 
 UserSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
+
     this.password = await bcrypt.hash(this.password, 12);
     this.passwordConfirm = undefined;
 });
@@ -105,6 +108,13 @@ UserSchema.methods.CreatePasswordRestToken = function () {
     this.TokenExp = Date.now() + 10 * 60 * 1000;
 
     return restToken;
+};
+
+UserSchema.methods.generateOTP = function () {
+    const otp = crypto.randomInt(100000, 999999);
+    this.OTP = otp;
+    this.OTPExp = Date.now() + 10 * 60 * 1000;
+    return otp;
 };
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

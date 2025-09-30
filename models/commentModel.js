@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 
-const CommentSchema = mongoose.Schema({
+const CommentSchema = new mongoose.Schema({
     content: {
         type: String,
         required: [true],
+        
     },
     user: {
         type: mongoose.Types.ObjectId,
